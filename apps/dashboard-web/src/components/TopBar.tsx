@@ -22,7 +22,7 @@ export function TopBar({ systemKw, substations, foundry, agentCount }: Props) {
 function Stat({ label, value, accent, dim }: { label: string; value: string; accent?: boolean; dim?: boolean }) {
   return (
     <div className="flex flex-col items-end leading-tight">
-      <span className="text-[10px] uppercase tracking-widest text-slate-500">{label}</span>
+      <span className="text-xs uppercase tracking-widest text-slate-500">{label}</span>
       <span className={`text-base ${accent ? 'text-grid-accent' : ''} ${dim ? 'text-slate-500' : ''}`}>{value}</span>
     </div>
   );
