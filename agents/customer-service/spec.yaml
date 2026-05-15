@@ -1,0 +1,14 @@
+name: ami-customer-service
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Customer-facing Q&A grounded on a single meter's data — outage status, signup, usage tips, tariff comparison.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_meter
+  - get_meter_reads
+  - get_substation_status
+  - get_tariff
+  - compare_to_neighbors
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: customer }

@@ -1,0 +1,16 @@
+name: ami-outage-detection
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Correlates last-gasp meter messages, customer calls, and SCADA signals to localize and quantify outages, then recommends a crew dispatch.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_substation_status
+  - get_meter
+  - get_meter_reads
+  - group_outage_by_topology
+  - correlate_outage_calls
+  - predict_restoration
+  - recommend_crew_dispatch
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: outage }

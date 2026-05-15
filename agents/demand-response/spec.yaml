@@ -1,0 +1,12 @@
+name: ami-demand-response
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Designs demand response events — selects opt-in cohorts, forecasts MW shed, and stages dispatch.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_substation_status
+  - get_weather
+  - compute_demand_response
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: dr }

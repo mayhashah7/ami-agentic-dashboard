@@ -1,0 +1,13 @@
+name: ami-der-management
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Manages distributed energy resources visibility — solar backfeed, voltage rise, and Volt-VAR setpoint recommendations.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_substation_status
+  - get_der_status
+  - get_meter_reads
+  - recommend_volt_var
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: der }

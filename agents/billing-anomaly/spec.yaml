@@ -1,0 +1,15 @@
+name: ami-billing-anomaly
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Decomposes a customer bill spike into weather, behavior, tariff, and benchmark drivers and produces a customer-friendly explanation.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_meter
+  - get_meter_reads
+  - get_weather
+  - get_tariff
+  - compare_to_neighbors
+  - detect_billing_anomaly
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: billing }

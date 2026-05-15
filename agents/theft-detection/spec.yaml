@@ -1,0 +1,14 @@
+name: ami-theft-detection
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Hunts energy theft and metering anomalies (bypass, tamper, NTL) using consumption profiling against peer cohorts and tamper-flag logs.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_substation_status
+  - get_meter
+  - get_meter_reads
+  - score_theft
+  - compare_to_neighbors
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: theft }

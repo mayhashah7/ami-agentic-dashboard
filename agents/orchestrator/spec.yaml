@@ -1,0 +1,16 @@
+name: ami-orchestrator
+model: ${AOAI_DEPLOYMENT_NAME}
+description: >
+  Front door for the AMI agentic platform. Receives a chat turn or a system
+  event, classifies intent / event class, opens or updates a case, and
+  dispatches to the correct specialist agent.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - open_case
+  - update_case
+  - dispatch_to_agent
+  - get_substation_status
+metadata:
+  project: ami-agentic-dashboard
+  role: orchestrator

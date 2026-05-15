@@ -1,0 +1,11 @@
+name: ami-predictive-maintenance
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Scores transformer / feeder health from harmonic distortion, load profile, and thermal proxies; flags assets at risk.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_substation_status
+  - score_transformer_health
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: maintenance }
