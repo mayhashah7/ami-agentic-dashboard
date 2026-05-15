@@ -1,5 +1,5 @@
 name: ami-ev-load-orchestration
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5-mini
 description: Orchestrates EV charging across the fleet — identifies shiftable load and stages off-peak nudges.
 instructions_file: prompt.md
 tools:

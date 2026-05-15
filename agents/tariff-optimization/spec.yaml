@@ -1,5 +1,5 @@
 name: ami-tariff-optimization
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5
 description: Recommends the best-fit tariff for a customer based on consumption shape, cohort comparison, and TOU eligibility.
 instructions_file: prompt.md
 tools:

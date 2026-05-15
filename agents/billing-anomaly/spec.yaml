@@ -1,5 +1,5 @@
 name: ami-billing-anomaly
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5-mini
 description: Decomposes a customer bill spike into weather, behavior, tariff, and benchmark drivers and produces a customer-friendly explanation.
 instructions_file: prompt.md
 tools:

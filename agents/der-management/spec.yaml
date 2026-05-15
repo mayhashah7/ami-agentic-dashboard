@@ -1,5 +1,5 @@
 name: ami-der-management
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5
 description: Manages distributed energy resources visibility — solar backfeed, voltage rise, and Volt-VAR setpoint recommendations.
 instructions_file: prompt.md
 tools:

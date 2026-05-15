@@ -117,7 +117,7 @@ def main() -> None:
         try:
             if name in existing:
                 agent = client.update_agent(
-                    assistant_id=existing[name], model=model, name=name,
+                    agent_id=existing[name], model=model, name=name,
                     description=s.get("description", ""), instructions=instructions, tools=tools,
                 )
                 action = "updated"
@@ -128,20 +128,21 @@ def main() -> None:
                 )
                 action = "created"
         except Exception as e:  # noqa: BLE001
+            print(f"  [ERROR] {name}: {e.__class__.__name__}: {e}")
             agent = None
             for a in client.list_agents():
                 if a.name == name:
                     agent = a; break
             if agent is None:
-                print(f"  [FAIL] {name}: {e}"); continue
+                print(f"  [FAIL] {name}: could not recover"); continue
             action = "recovered"
-        results.append((name, agent.id, action))
-        print(f"  [{action}] {name} → {agent.id}")
+        results.append((name, agent.id, action, model))
+        print(f"  [{action}] {name} → {agent.id}  ({model})")
 
-    print("\n┌─ Foundry agents ───────────────────────────┐")
-    for n, i, a in results:
-        print(f"│ [{a:>9}] {n:<28} {i}")
-    print("└────────────────────────────────────────────┘")
+    print("\n┌─ Foundry agents ─────────────────────────────────────────┐")
+    for n, i, a, mdl in results:
+        print(f"│ [{a:>9}] {n:<28} {mdl:<14} {i}")
+    print("└──────────────────────────────────────────────────────────┘")
 
 
 

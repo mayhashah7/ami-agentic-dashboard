@@ -1,5 +1,5 @@
 name: ami-orchestrator
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5-mini
 description: >
   Front door for the AMI agentic platform. Receives a chat turn or a system
   event, classifies intent / event class, opens or updates a case, and

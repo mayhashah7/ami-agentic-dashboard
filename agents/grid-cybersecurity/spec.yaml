@@ -1,5 +1,5 @@
 name: ami-grid-cybersecurity
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5
 description: Monitors grid-edge meter NIC traffic for cybersecurity anomalies (unauthorized firmware queries, replay attempts, geo-anomalous traffic).
 instructions_file: prompt.md
 tools:

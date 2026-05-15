@@ -1,5 +1,5 @@
 name: ami-outage-detection
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5-mini
 description: Correlates last-gasp meter messages, customer calls, and SCADA signals to localize and quantify outages, then recommends a crew dispatch.
 instructions_file: prompt.md
 tools:

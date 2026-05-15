@@ -41,6 +41,7 @@ class FoundryAgentRunner:
     def __init__(self) -> None:
         self._client = None
         self._agent_ids: dict[str, str] = {}
+        self._agent_models: dict[str, str] = {}
 
     def _ensure_client(self):
         if self._client is not None:
@@ -59,6 +60,7 @@ class FoundryAgentRunner:
             client = AgentsClient(endpoint=settings.foundry_endpoint, credential=cred)
             for a in client.list_agents():
                 self._agent_ids[a.name] = a.id
+                self._agent_models[a.name] = getattr(a, "model", "") or ""
             self._client = client
             return self._client
         except Exception as e:  # noqa: BLE001
@@ -92,7 +94,7 @@ class FoundryAgentRunner:
 
             terminal = {"completed", "failed", "cancelled", "expired", "requires_action"}
             while run.status not in terminal:
-                time.sleep(0.4)
+                await asyncio.sleep(0.4)
                 run = client.runs.get(thread_id=thread.id, run_id=run.id)
                 yield {"type": "status", "status": run.status}
 

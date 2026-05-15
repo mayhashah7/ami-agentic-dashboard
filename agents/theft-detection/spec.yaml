@@ -1,5 +1,5 @@
 name: ami-theft-detection
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5
 description: Hunts energy theft and metering anomalies (bypass, tamper, NTL) using consumption profiling against peer cohorts and tamper-flag logs.
 instructions_file: prompt.md
 tools:

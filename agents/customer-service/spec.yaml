@@ -1,5 +1,5 @@
 name: ami-customer-service
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5-chat
 description: Customer-facing Q&A grounded on a single meter's data — outage status, signup, usage tips, tariff comparison.
 instructions_file: prompt.md
 tools:

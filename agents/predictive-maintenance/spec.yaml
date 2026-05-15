@@ -1,5 +1,5 @@
 name: ami-predictive-maintenance
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5
 description: Scores transformer / feeder health from harmonic distortion, load profile, and thermal proxies; flags assets at risk.
 instructions_file: prompt.md
 tools:

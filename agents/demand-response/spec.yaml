@@ -1,5 +1,5 @@
 name: ami-demand-response
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5-mini
 description: Designs demand response events — selects opt-in cohorts, forecasts MW shed, and stages dispatch.
 instructions_file: prompt.md
 tools:

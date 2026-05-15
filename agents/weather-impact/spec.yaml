@@ -1,5 +1,5 @@
 name: ami-weather-impact
-model: ${AOAI_DEPLOYMENT_NAME}
+model: gpt-5-mini
 description: Correlates weather conditions with substation load and recommends pre-cool / pre-heat actions.
 instructions_file: prompt.md
 tools:

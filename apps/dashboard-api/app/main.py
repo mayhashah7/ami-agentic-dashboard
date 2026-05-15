@@ -139,9 +139,18 @@ async def get_case(case_id: str) -> dict:
 
 @app.get("/api/agents/roster")
 async def agent_roster() -> list[dict]:
-    """Return the full agent fabric definition for UI rendering."""
-    from .agents import AGENT_ROSTER
-    return AGENT_ROSTER
+    """Return the full agent fabric definition for UI rendering, augmented
+    with the live Foundry agent id + model when available."""
+    from .agents import AGENT_ROSTER, runner
+    runner._ensure_client()  # populate id/model maps if not yet
+    out = []
+    for a in AGENT_ROSTER:
+        item = dict(a)
+        item["agent_id"] = runner._agent_ids.get(a["name"])
+        item["model"] = runner._agent_models.get(a["name"])
+        item["registered"] = item["agent_id"] is not None
+        out.append(item)
+    return out
 
 
 @app.get("/api/agents/traces")
