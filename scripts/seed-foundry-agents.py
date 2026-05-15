@@ -16,7 +16,7 @@ from pathlib import Path
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-AGENTS_DIR = REPO_ROOT / "agents"
+_DEFAULT_AGENTS_DIR = REPO_ROOT / "agents"
 
 
 def load_outputs(path: str) -> dict:
@@ -27,9 +27,9 @@ def load_outputs(path: str) -> dict:
     return raw
 
 
-def load_agent_specs() -> list[dict]:
+def load_agent_specs(agents_dir: Path) -> list[dict]:
     out = []
-    for d in sorted(AGENTS_DIR.iterdir()):
+    for d in sorted(agents_dir.iterdir()):
         if not d.is_dir() or d.name == "tools":
             continue
         spec_file = d / "spec.yaml"
@@ -44,12 +44,11 @@ def load_agent_specs() -> list[dict]:
     return out
 
 
-def build_tool_defs(tool_names: list[str]) -> list[dict]:
+def build_tool_defs(tool_names: list[str], agents_dir: Path) -> list[dict]:
     try:
         from ami_tools.schemas import TOOL_SCHEMAS
     except ImportError:
-        # Path fallback for direct script run
-        sys.path.insert(0, str(REPO_ROOT / "agents" / "tools"))
+        sys.path.insert(0, str(agents_dir / "tools"))
         from ami_tools.schemas import TOOL_SCHEMAS  # type: ignore
     return [{"function": TOOL_SCHEMAS[n]} for n in tool_names if n in TOOL_SCHEMAS]
 
@@ -57,8 +56,11 @@ def build_tool_defs(tool_names: list[str]) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--outputs", help="Path to outputs.json from deployment")
+    ap.add_argument("--agents-dir", default=None, help="Path to agents/ directory")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
+
+    agents_dir = Path(args.agents_dir) if args.agents_dir else _DEFAULT_AGENTS_DIR
 
     outputs = load_outputs(args.outputs) if args.outputs else {}
     endpoint = outputs.get("foundryProjectEndpoint") or os.environ.get("FOUNDRY_PROJECT_ENDPOINT")
@@ -66,7 +68,7 @@ def main() -> None:
     if not endpoint:
         sys.exit("ERROR: foundryProjectEndpoint not in outputs and FOUNDRY_PROJECT_ENDPOINT not set")
 
-    specs = load_agent_specs()
+    specs = load_agent_specs(agents_dir)
     if not specs:
         sys.exit("ERROR: no agent specs under agents/")
 
@@ -79,11 +81,15 @@ def main() -> None:
     try:
         from azure.identity import AzureCliCredential, ChainedTokenCredential, ManagedIdentityCredential
         from azure.ai.agents import AgentsClient
-        from azure.ai.agents.models import FunctionTool
+        from azure.ai.agents.models import FunctionDefinition, FunctionToolDefinition
     except ImportError:
         sys.exit("ERROR: install scripts/requirements.txt")
 
-    cred = ChainedTokenCredential(AzureCliCredential(), ManagedIdentityCredential())
+    client_id = os.environ.get("AZURE_CLIENT_ID")
+    cred = ChainedTokenCredential(
+        ManagedIdentityCredential(client_id=client_id) if client_id else ManagedIdentityCredential(),
+        AzureCliCredential(),
+    )
     client = AgentsClient(endpoint=endpoint, credential=cred)
 
     existing = {a.name: a.id for a in client.list_agents()}
@@ -94,12 +100,17 @@ def main() -> None:
         name = s.get("name", s["_dir"])
         instructions = s.get("_prompt", "")
         tool_names = s.get("tools", [])
-        tool_defs = build_tool_defs(tool_names)
-        tools = [FunctionTool(
-            name=t["function"]["name"],
-            description=t["function"].get("description", ""),
-            parameters=t["function"].get("parameters", {}),
-        ) for t in tool_defs]
+        tool_defs = build_tool_defs(tool_names, agents_dir)
+        tools = []
+        for t in tool_defs:
+            fn = t["function"]
+            tools.append(FunctionToolDefinition(
+                function=FunctionDefinition(
+                    name=fn["name"],
+                    description=fn.get("description", ""),
+                    parameters=fn.get("parameters", {"type": "object", "properties": {}}),
+                )
+            ))
 
         model = (s.get("model") or "gpt-4o").replace("${AOAI_DEPLOYMENT_NAME}", deployment)
 
@@ -117,7 +128,6 @@ def main() -> None:
                 )
                 action = "created"
         except Exception as e:  # noqa: BLE001
-            # Some SDKs throw after the call succeeds — rediscover by name
             agent = None
             for a in client.list_agents():
                 if a.name == name:
@@ -132,6 +142,7 @@ def main() -> None:
     for n, i, a in results:
         print(f"│ [{a:>9}] {n:<28} {i}")
     print("└────────────────────────────────────────────┘")
+
 
 
 if __name__ == "__main__":

@@ -15,6 +15,37 @@ from .simulator import SCENARIOS, build_topology, simulator_loop
 from .store import store
 
 
+async def _auto_seed_agents() -> None:
+    """Wait 30 s then attempt to seed all agents into Foundry via subprocess."""
+    import subprocess
+    import os as _os
+    if not settings.foundry_endpoint:
+        return
+    await asyncio.sleep(30)
+    seed_script = "/app/scripts/seed-foundry-agents.py"
+    if not _os.path.exists(seed_script):
+        print("[startup] seed script not found — skipping auto-seed")
+        return
+    print("[startup] Auto-seeding Foundry agents...")
+    env = {**_os.environ,
+           "FOUNDRY_PROJECT_ENDPOINT": settings.foundry_endpoint,
+           "AOAI_DEPLOYMENT_NAME": settings.aoai_deployment or "gpt-4o"}
+    try:
+        import sys as _sys
+        result = subprocess.run(
+            [_sys.executable, seed_script, "--agents-dir", "/app/agents"],
+            capture_output=True, text=True, timeout=120, env=env,
+        )
+        if result.stdout:
+            print(result.stdout[-2000:])
+        if result.returncode != 0:
+            print(f"[startup] seed non-zero exit: {result.stderr[-500:]}")
+        else:
+            print("[startup] Foundry agent seed complete ✓")
+    except Exception as e:  # noqa: BLE001
+        print(f"[startup] seed failed: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     build_topology(seed=settings.seed)
@@ -22,6 +53,7 @@ async def lifespan(app: FastAPI):
     task: asyncio.Task | None = None
     if settings.enable_simulator:
         task = asyncio.create_task(simulator_loop())
+        asyncio.create_task(_auto_seed_agents())
     yield
     if task:
         task.cancel()
