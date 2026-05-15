@@ -56,7 +56,9 @@ class FoundryAgentRunner:
         try:
             agent_id = self._agent_ids.get(ORCHESTRATOR_NAME)
             if not agent_id:
-                yield {"type": "error", "message": "orchestrator agent not registered (run seed-foundry-agents.py)"}
+                print(f"[agents] orchestrator agent not in Foundry project — falling back to mock")
+                async for evt in self._mock_chat(text=text, persona=persona, case_id=case_id):
+                    yield evt
                 return
 
             thread = client.threads.create()

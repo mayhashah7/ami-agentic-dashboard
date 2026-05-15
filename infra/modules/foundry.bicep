@@ -89,4 +89,4 @@ output aiServicesName string = aiServices.name
 output aoaiEndpoint string = aiServices.properties.endpoint
 output aoaiDeploymentName string = gpt4o.name
 output embeddingsDeploymentName string = embeddings.name
-output projectEndpoint string = 'https://${aiServices.name}.services.ai.azure.com/api/projects/${project.name}'
+output projectEndpoint string = 'https://${subDomain}.services.ai.azure.com/api/projects/${project.name}'
