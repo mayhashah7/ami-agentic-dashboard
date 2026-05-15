@@ -25,7 +25,9 @@ const STARTERS: Record<Persona, string[]> = {
   ],
 };
 
-export function ChatPanel() {
+type ChatPanelProps = { onAgentActive?: (name: string) => void };
+
+export function ChatPanel({ onAgentActive }: ChatPanelProps = {}) {
   const [persona, setPersona] = useState<Persona>('operator');
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -53,6 +55,8 @@ export function ChatPanel() {
         } else if (evt.type === 'final') {
           setMsgs(m => [...m, { role: 'assistant', text: evt.text }]);
           answered = true;
+        } else if (evt.type === 'tool_result' && evt.name === 'dispatch_to_agent' && onAgentActive) {
+          onAgentActive(evt.result?.target_agent ?? '');
         }
       }
       if (!answered) setMsgs(m => [...m, { role: 'assistant', text: '(no answer returned)' }]);

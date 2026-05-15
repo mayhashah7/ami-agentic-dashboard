@@ -1,0 +1,12 @@
+name: ami-ev-load-orchestration
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Orchestrates EV charging across the fleet — identifies shiftable load and stages off-peak nudges.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_substation_status
+  - get_meter
+  - get_meter_reads
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: ev }

@@ -11,7 +11,7 @@ const KIND_COLOR: Record<string, string> = {
   inquiry: 'bg-slate-500/20 text-slate-300 border-slate-500/40',
 };
 
-export function CasePanel({ cases }: { cases: Case[] }) {
+export function CasePanel({ cases, layout = 'vertical' }: { cases: Case[]; layout?: 'vertical' | 'horizontal' }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [traces, setTraces] = useState<Trace[]>([]);
 
@@ -30,18 +30,18 @@ export function CasePanel({ cases }: { cases: Case[] }) {
         <h2 className="text-sm font-semibold tracking-wide">ACTIVE CASES</h2>
         <span className="text-xs text-slate-500">{cases.length}</span>
       </div>
-      <div className="overflow-y-auto flex-1 scroll-fade pr-1 space-y-2">
+      <div className={`overflow-auto flex-1 scroll-fade pr-1 ${layout === 'horizontal' ? 'flex gap-2' : 'space-y-2'}`}>
         {cases.length === 0 && <div className="text-xs text-slate-500">No cases yet — fire a scenario or ask in chat.</div>}
         {cases.map(c => (
-          <div key={c.case_id} className="rounded-lg border border-grid-border bg-grid-bg overflow-hidden">
+          <div key={c.case_id} className={`rounded-lg border border-grid-border bg-grid-bg overflow-hidden ${layout === 'horizontal' ? 'min-w-[280px] max-w-[320px] shrink-0' : ''}`}>
             <button onClick={() => setOpenId(openId === c.case_id ? null : c.case_id)} className="w-full text-left p-2 hover:bg-grid-border/40">
               <div className="flex items-center gap-2">
                 <span className={`text-[10px] px-1.5 py-0.5 rounded border ${KIND_COLOR[c.kind] ?? KIND_COLOR.inquiry}`}>{c.kind.toUpperCase()}</span>
-                <span className="text-xs text-slate-400 font-mono">{c.case_id}</span>
+                <span className="text-xs text-slate-400 font-mono truncate">{c.case_id}</span>
                 <span className={`ml-auto text-[10px] ${c.status === 'resolved' ? 'text-grid-ok' : 'text-grid-warn'}`}>{c.status}</span>
               </div>
               <div className="text-sm mt-1 line-clamp-2">{c.summary}</div>
-              {c.recommendation && <div className="text-[11px] text-slate-400 mt-1">↳ {c.recommendation}</div>}
+              {c.recommendation && <div className="text-[11px] text-slate-400 mt-1 line-clamp-2">↳ {c.recommendation}</div>}
             </button>
             {openId === c.case_id && (
               <div className="px-2 pb-2 border-t border-grid-border bg-black/30 max-h-56 overflow-y-auto">

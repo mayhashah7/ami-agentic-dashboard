@@ -211,7 +211,8 @@ async def scenario_storm_outage(substation_id: str | None = None, feeder_index: 
         "payload": {"affected_count": len(affected), "scope": "feeder"},
     }
     store.add_event(evt)
-    return {"event_id": evt["id"], "affected": len(affected), "substation_id": sub_id, "feeder_id": feeder_id}
+    asyncio.create_task(_dispatch_safe(evt))
+    return {"event_id": evt["id"], "affected": len(affected), "substation_id": sub_id, "feeder_id": feeder_id, "agent_dispatched": "ami-outage-detection"}
 
 
 async def scenario_der_overvoltage(substation_id: str | None = None) -> dict:
@@ -229,7 +230,8 @@ async def scenario_der_overvoltage(substation_id: str | None = None) -> dict:
         "payload": {"affected_count": len(sols)},
     }
     store.add_event(evt)
-    return {"event_id": evt["id"], "affected": len(sols), "substation_id": sub_id}
+    asyncio.create_task(_dispatch_safe(evt))
+    return {"event_id": evt["id"], "affected": len(sols), "substation_id": sub_id, "agent_dispatched": "ami-der-management"}
 
 
 async def scenario_heat_wave() -> dict:
@@ -246,7 +248,8 @@ async def scenario_heat_wave() -> dict:
         "payload": {"forecast_peak_mw": 1850, "reserve_margin_pct": 4.5, "scenario": "heat_wave"},
     }
     store.add_event(evt)
-    return {"event_id": evt["id"], "scenario": "heat_wave"}
+    asyncio.create_task(_dispatch_safe(evt))
+    return {"event_id": evt["id"], "scenario": "heat_wave", "agent_dispatched": "ami-demand-response"}
 
 
 async def scenario_theft(substation_id: str | None = None, count: int = 3) -> dict:
@@ -267,12 +270,93 @@ async def scenario_theft(substation_id: str | None = None, count: int = 3) -> di
         "payload": {"tamper_count": len(chosen)},
     }
     store.add_event(evt)
-    return {"event_id": evt["id"], "affected": len(chosen), "substation_id": sub_id}
+    asyncio.create_task(_dispatch_safe(evt))
+    return {"event_id": evt["id"], "affected": len(chosen), "substation_id": sub_id, "agent_dispatched": "ami-theft-detection"}
+
+
+async def scenario_transformer_aging(substation_id: str | None = None) -> dict:
+    sub_id = substation_id or next(iter(store.substations))
+    evt = {
+        "id": str(uuid.uuid4()),
+        "kind": "transformer_health",
+        "severity": 2,
+        "substation_id": sub_id,
+        "meter_ids": [],
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "payload": {"reason": "harmonic distortion + sustained load proxy crossed threshold"},
+    }
+    store.add_event(evt)
+    asyncio.create_task(_dispatch_safe(evt))
+    return {"event_id": evt["id"], "substation_id": sub_id, "agent_dispatched": "ami-predictive-maintenance"}
+
+
+async def scenario_cyber_burst(substation_id: str | None = None) -> dict:
+    sub_id = substation_id or next(iter(store.substations))
+    evt = {
+        "id": str(uuid.uuid4()),
+        "kind": "cyber",
+        "severity": 1,
+        "substation_id": sub_id,
+        "meter_ids": [],
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "payload": {"reason": "elevated rate of unauthorized firmware queries from grid-edge NICs"},
+    }
+    store.add_event(evt)
+    asyncio.create_task(_dispatch_safe(evt))
+    return {"event_id": evt["id"], "substation_id": sub_id, "agent_dispatched": "ami-grid-cybersecurity"}
+
+
+async def scenario_ev_surge(substation_id: str | None = None) -> dict:
+    sub_id = substation_id or next(iter(store.substations))
+    evs = [m for m in store.meters.values() if m["substation_id"] == sub_id and m["persona"] == "ev-owner"]
+    for m in evs:
+        m["baseline_kw"] = max(m["baseline_kw"], 7.5)  # simulate plug-in surge
+    evt = {
+        "id": str(uuid.uuid4()),
+        "kind": "ev_surge",
+        "severity": 2,
+        "substation_id": sub_id,
+        "meter_ids": [m["meter_id"] for m in evs[:25]],
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "payload": {"ev_count": len(evs), "trigger": "evening plug-in burst"},
+    }
+    store.add_event(evt)
+    asyncio.create_task(_dispatch_safe(evt))
+    return {"event_id": evt["id"], "substation_id": sub_id, "ev_count": len(evs), "agent_dispatched": "ami-ev-load-orchestration"}
+
+
+async def scenario_weather_alert(substation_id: str | None = None) -> dict:
+    sub_id = substation_id or next(iter(store.substations))
+    evt = {
+        "id": str(uuid.uuid4()),
+        "kind": "weather_alert",
+        "severity": 2,
+        "substation_id": sub_id,
+        "meter_ids": [],
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "payload": {"alert": "Excessive heat warning + thunderstorm watch"},
+    }
+    store.add_event(evt)
+    asyncio.create_task(_dispatch_safe(evt))
+    return {"event_id": evt["id"], "substation_id": sub_id, "agent_dispatched": "ami-weather-impact"}
+
+
+async def _dispatch_safe(evt: dict) -> None:
+    """Lazy-import the agent runner to avoid an import cycle, and never raise."""
+    try:
+        from .agents import auto_dispatch_for_event
+        await auto_dispatch_for_event(evt)
+    except Exception as e:  # noqa: BLE001
+        print(f"[scenario] auto-dispatch failed: {e}")
 
 
 SCENARIOS = {
-    "storm-outage": scenario_storm_outage,
-    "der-overvoltage": scenario_der_overvoltage,
-    "heat-wave": scenario_heat_wave,
-    "theft": scenario_theft,
+    "storm-outage":        scenario_storm_outage,
+    "der-overvoltage":     scenario_der_overvoltage,
+    "heat-wave":           scenario_heat_wave,
+    "theft":               scenario_theft,
+    "transformer-aging":   scenario_transformer_aging,
+    "cyber-burst":         scenario_cyber_burst,
+    "ev-surge":            scenario_ev_surge,
+    "weather-alert":       scenario_weather_alert,
 }

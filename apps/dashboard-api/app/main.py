@@ -105,6 +105,13 @@ async def get_case(case_id: str) -> dict:
     return {**c, "traces": store.traces_by_case.get(case_id, [])}
 
 
+@app.get("/api/agents/roster")
+async def agent_roster() -> list[dict]:
+    """Return the full agent fabric definition for UI rendering."""
+    from .agents import AGENT_ROSTER
+    return AGENT_ROSTER
+
+
 @app.get("/api/agents/traces")
 async def list_traces(case_id: str) -> list[dict]:
     return store.traces_by_case.get(case_id, [])

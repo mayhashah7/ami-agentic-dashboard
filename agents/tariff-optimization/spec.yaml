@@ -1,0 +1,13 @@
+name: ami-tariff-optimization
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Recommends the best-fit tariff for a customer based on consumption shape, cohort comparison, and TOU eligibility.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_meter
+  - get_meter_reads
+  - get_tariff
+  - compare_to_neighbors
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: tariff }

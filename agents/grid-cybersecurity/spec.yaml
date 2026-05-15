@@ -1,0 +1,10 @@
+name: ami-grid-cybersecurity
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Monitors grid-edge meter NIC traffic for cybersecurity anomalies (unauthorized firmware queries, replay attempts, geo-anomalous traffic).
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_substation_status
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: security }

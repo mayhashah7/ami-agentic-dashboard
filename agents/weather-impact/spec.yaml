@@ -1,0 +1,11 @@
+name: ami-weather-impact
+model: ${AOAI_DEPLOYMENT_NAME}
+description: Correlates weather conditions with substation load and recommends pre-cool / pre-heat actions.
+instructions_file: prompt.md
+tools:
+  - record_trace
+  - update_case
+  - close_case
+  - get_substation_status
+  - get_weather
+metadata: { project: ami-agentic-dashboard, role: specialist, domain: weather }
