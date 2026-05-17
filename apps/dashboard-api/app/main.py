@@ -167,12 +167,23 @@ class ScenarioReq(BaseModel):
     count: int | None = None
 
 
+@app.get("/api/scenarios")
+async def list_scenarios() -> list[dict]:
+    from .simulator import SCENARIO_META
+    return SCENARIO_META
+
+
 @app.post("/api/scenarios/{name}")
 async def run_scenario(name: str, req: ScenarioReq | None = None) -> dict:
     fn = SCENARIOS.get(name)
     if not fn:
         raise HTTPException(404, f"unknown scenario {name}; choices: {list(SCENARIOS)}")
-    kwargs = {k: v for k, v in (req.dict() if req else {}).items() if v is not None}
+    import inspect
+    raw_kwargs = {k: v for k, v in (req.dict() if req else {}).items() if v is not None}
+    sig = inspect.signature(fn)
+    accepted = set(sig.parameters.keys())
+    has_var_kw = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
+    kwargs = raw_kwargs if has_var_kw else {k: v for k, v in raw_kwargs.items() if k in accepted}
     return await fn(**kwargs)
 
 
