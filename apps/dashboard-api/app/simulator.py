@@ -176,7 +176,7 @@ async def simulator_loop() -> None:
             await tick_reads()
         except Exception as e:  # noqa: BLE001
             print(f"[simulator] tick error: {e}")
-        await asyncio.sleep(2.0)
+        await asyncio.sleep(1.5)
 
 
 # ── Scenarios ──────────────────────────────────────────────────────────────
@@ -360,3 +360,14 @@ SCENARIOS = {
     "ev-surge":            scenario_ev_surge,
     "weather-alert":       scenario_weather_alert,
 }
+
+SCENARIO_META = [
+    {"id": "storm-outage",      "label": "⛈️ Storm Outage",       "agent": "ami-outage-detection",       "hint": "Knocks a feeder offline"},
+    {"id": "theft",             "label": "🕵️ Theft Pattern",      "agent": "ami-theft-detection",        "hint": "Plant tampers + flat reads"},
+    {"id": "der-overvoltage",   "label": "☀️ Solar Backfeed",     "agent": "ami-der-management",         "hint": "Volt-VAR risk on secondaries"},
+    {"id": "heat-wave",         "label": "🔥 Heat Wave",          "agent": "ami-demand-response",        "hint": "Trigger DR cohort selection"},
+    {"id": "transformer-aging", "label": "🔧 Transformer Aging",  "agent": "ami-predictive-maintenance", "hint": "Score asset health"},
+    {"id": "cyber-burst",       "label": "🛡️ Cyber Anomaly",      "agent": "ami-grid-cybersecurity",     "hint": "Unauthorized firmware queries"},
+    {"id": "ev-surge",          "label": "🔌 EV Plug-in Surge",   "agent": "ami-ev-load-orchestration",  "hint": "Evening EV charging burst"},
+    {"id": "weather-alert",     "label": "🌦️ Weather Alert",      "agent": "ami-weather-impact",         "hint": "Heat warning + storm watch"},
+]

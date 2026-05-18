@@ -3,7 +3,7 @@ WORKDIR /app
 COPY apps/dashboard-web/package.json apps/dashboard-web/package-lock.json* ./
 RUN npm install --no-audit --no-fund
 COPY apps/dashboard-web/ ./
-RUN npm run build
+RUN chmod -R +x node_modules/.bin && npm run build
 
 FROM nginx:alpine
 COPY apps/dashboard-web/nginx-runtime.conf /etc/nginx/conf.d/default.conf
